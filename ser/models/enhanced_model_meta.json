@@ -1,0 +1,1 @@
+{"feature_dim": 24, "feature_config": {"mfcc": true, "chroma": false, "mel": false, "contrast": false, "tonnetz": false}, "feature_params": {"n_fft": 1024, "hop_length": 512, "n_mfcc": 24}, "model_type": "hgb", "use_fast_training": true}

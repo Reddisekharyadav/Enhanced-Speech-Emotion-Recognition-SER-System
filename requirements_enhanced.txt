@@ -1,0 +1,38 @@
+# Enhanced Speech Emotion Recognition Requirements
+# Core dependencies
+numpy>=1.21.0
+scipy>=1.7.0
+scikit-learn>=1.0.0
+librosa>=0.9.0
+soundfile>=0.12.0
+
+# GUI and visualization
+PyQt5>=5.15.0
+matplotlib>=3.5.0
+
+# Audio processing and real-time recording
+sounddevice>=0.4.0
+
+# AI and machine learning enhancements
+halo>=0.0.31
+colored>=1.4.0
+
+# Speech recognition and transcription
+openai-whisper>=20231106
+stable-ts>=2.13.3
+
+# Utility libraries
+python-dotenv>=0.19.0
+requests>=2.27.0
+tqdm>=4.62.0
+
+# Development and testing (optional)
+pytest>=6.2.0
+black>=22.0.0
+flake8>=4.0.0
+
+# For enhanced audio processing
+ffmpeg-python>=0.2.0
+
+# Type hints and development
+typing-extensions>=4.0.0
