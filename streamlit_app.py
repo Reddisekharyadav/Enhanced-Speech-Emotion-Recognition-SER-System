@@ -359,7 +359,97 @@ def main():
     # Tab 1: Real-time Analysis (matching PyQt5 create_realtime_tab)
     with tab1:
         st.header("🎙️ Real-time Emotion Detection")
-        st.info("💡 **Note:** Real-time microphone recording requires local deployment. Upload pre-recorded files in the File Analysis tab for web deployment.")
+        
+        # Add audio recorder
+        st.markdown("### 🎤 Record Your Voice")
+        st.info("💡 Click the microphone button below to record your voice and analyze emotions in real-time!")
+        
+        # Try to import audio recorder
+        try:
+            from audio_recorder_streamlit import audio_recorder
+            
+            col_record1, col_record2 = st.columns([2, 1])
+            
+            with col_record1:
+                # Audio recorder component
+                audio_bytes = audio_recorder(
+                    text="Click to Record",
+                    recording_color="#e74c3c",
+                    neutral_color="#2E86AB",
+                    icon_name="microphone",
+                    icon_size="3x",
+                    key="audio_recorder"
+                )
+                
+                if audio_bytes:
+                    st.audio(audio_bytes, format="audio/wav")
+                    
+                    # Analyze recorded audio
+                    with st.spinner("🔄 Analyzing your voice..."):
+                        # Save audio bytes to temporary file
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+                            tmp_file.write(audio_bytes)
+                            tmp_path = tmp_file.name
+                        
+                        try:
+                            # Predict emotion
+                            emotion, confidence = predict_emotion_from_file(tmp_path)
+                            
+                            if emotion and confidence:
+                                # Update visualization
+                                update_emotion_visualization(emotion, confidence)
+                                
+                                st.success(f"✅ Detected: **{emotion.upper()}** ({confidence:.1%} confidence)")
+                                
+                                # AI Response
+                                ai_response = get_ai_response(emotion)
+                                st.info(f"🤖 {ai_response}")
+                                
+                                # Add to chat history
+                                timestamp = time.strftime("%H:%M:%S")
+                                emotion_colors = {
+                                    "happy": "#4CAF50", "sad": "#2196F3", "angry": "#F44336",
+                                    "fearful": "#FF9800", "surprised": "#E91E63", "neutral": "#9E9E9E",
+                                    "calm": "#00BCD4", "disgust": "#9C27B0"
+                                }
+                                color = emotion_colors.get(emotion, "#9E9E9E")
+                                
+                                chat_msg = f"""
+                                <div class="chat-message" style="border-left-color: {color}; background-color: {color}20;">
+                                    <b style="color: {color};">🎤 Live Recording:</b> {emotion.title()} ({confidence:.0%} confidence)<br>
+                                    <b>🤖 AI Response:</b> {ai_response}<br>
+                                    <small style="color: #666;">Time: {timestamp}</small>
+                                </div>
+                                """
+                                st.session_state.ai_chat_history.append(chat_msg)
+                            else:
+                                st.warning("⚠️ Could not detect emotion. Try speaking more clearly.")
+                        
+                        except Exception as e:
+                            st.error(f"❌ Error: {str(e)}")
+                        
+                        finally:
+                            # Clean up
+                            if os.path.exists(tmp_path):
+                                try:
+                                    os.unlink(tmp_path)
+                                except:
+                                    pass
+            
+            with col_record2:
+                st.markdown("**📝 Tips:**")
+                st.markdown("""
+                - Speak clearly for 2-5 seconds
+                - Express your emotion naturally
+                - Ensure quiet environment
+                - Allow microphone access
+                """)
+        
+        except ImportError:
+            st.warning("⚠️ Audio recorder not available. Install with: `pip install audio-recorder-streamlit`")
+            st.info("💡 **Alternative:** Use the **File Analysis** tab to upload pre-recorded audio files.")
+        
+        st.markdown("---")
         
         col1, col2 = st.columns([1, 1])
         

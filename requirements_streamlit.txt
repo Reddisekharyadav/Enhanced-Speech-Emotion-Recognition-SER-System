@@ -7,6 +7,9 @@ scikit-learn>=1.0.0
 librosa>=0.10.0
 soundfile>=0.12.0
 
+# Real-time audio recording
+audio-recorder-streamlit>=0.0.8
+
 # AI and machine learning
 tensorflow>=2.13.0
 keras>=2.13.0
