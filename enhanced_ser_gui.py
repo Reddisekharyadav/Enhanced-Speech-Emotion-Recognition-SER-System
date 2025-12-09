@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QVBoxLayout,
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QThread, QMetaObject, Q_ARG, pyqtSlot
 from PyQt5.QtGui import QFont, QPalette, QColor, QPixmap
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.patches as patches
 
 from ser.models.enhanced_emotion_model import predict_emotion_realtime, train_enhanced_model
@@ -295,7 +295,8 @@ class AIResponseWidget(QWidget):
         
         # Scroll to bottom
         scrollbar = self.chat_display.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
+        if scrollbar:
+            scrollbar.setValue(scrollbar.maximum())
 
 class AdvancedSERApp(QWidget):
     """Main application window for Speech Emotion Recognition."""
@@ -368,14 +369,14 @@ class AdvancedSERApp(QWidget):
         controls_layout.addWidget(self.start_btn)
 
         controls_layout.addWidget(QLabel("Sensitivity:"))
-        self.sensitivity_slider = QSlider(Qt.Horizontal)
+        self.sensitivity_slider = QSlider(Qt.Orientation.Horizontal)
         self.sensitivity_slider.setRange(1, 10)
         self.sensitivity_slider.setValue(6)
         controls_layout.addWidget(self.sensitivity_slider)
 
         layout.addLayout(controls_layout)
 
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         self.emotion_viz = EmotionVisualizationWidget()
         splitter.addWidget(self.emotion_viz)
         self.ai_chat = AIResponseWidget()
@@ -535,13 +536,13 @@ class AdvancedSERApp(QWidget):
         thread_id = threading.get_ident()
         logger.info(f"[File Analysis] Thread {thread_id} started")
         try:
-            if not os.path.exists(self.current_audio_file):
+            if not self.current_audio_file or not os.path.exists(self.current_audio_file):
                 raise FileNotFoundError(f"Audio file missing: {self.current_audio_file}")
             logger.info(f"[File Analysis] Loading & predicting: {self.current_audio_file}")
             result = predict_emotion_realtime(self.current_audio_file)
             if isinstance(result, dict) and "label" in result and "confidence" in result:
-                emotion = result["label"]
-                confidence = result["confidence"]
+                emotion = result.get("label", str(result))
+                confidence = result.get("confidence", 1.0)
             else:
                 emotion = str(result)
                 confidence = 1.0
@@ -571,8 +572,8 @@ class AdvancedSERApp(QWidget):
                 result = predict_emotion_realtime(audio_path)
                 # Robustly unpack emotion/confidence from dict or tuple/list
                 if isinstance(result, dict) and "label" in result and "confidence" in result:
-                    emotion = result["label"]
-                    confidence = result["confidence"]
+                    emotion = result.get("label", str(result))
+                    confidence = result.get("confidence", 1.0)
                 elif isinstance(result, (list, tuple)) and len(result) > 0:
                     first = result[0]
                     if isinstance(first, (list, tuple)):
@@ -611,7 +612,8 @@ class AdvancedSERApp(QWidget):
             timestamp = time.strftime('%H:%M:%S')
             self.transcript_display.append(f"[{timestamp}] {text}")
             # Limit transcript to last ~100 lines
-            if self.transcript_display.document().blockCount() > 100:
+            doc = self.transcript_display.document()
+            if doc and doc.blockCount() > 100:
                 cursor = self.transcript_display.textCursor()
                 cursor.movePosition(cursor.Start)
                 cursor.select(cursor.LineUnderCursor)
@@ -635,7 +637,11 @@ class AdvancedSERApp(QWidget):
                 self.stt_model = whisper.load_model(model_name)
             # Run transcription (short chunk)
             result = self.stt_model.transcribe(audio_path, fp16=False, language=Config.DEFAULT_LANGUAGE)
-            text = (result or {}).get("text", "").strip()
+            text = (result or {}).get("text", "")
+            if isinstance(text, str):
+                text = text.strip()
+            else:
+                text = ""
             logger.debug(f"Transcription result: '{text}'")
             return text
         except Exception as e:

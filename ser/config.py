@@ -89,7 +89,7 @@ class Config:
 
         # Model configuration
     MODELS_CONFIG: dict[str, Any] = {
-    "models_folder": "./speech-emotion-recognition/ser/models",
+        "models_folder": "./ser/models",
         "whisper_model": {"name": "tiny", "path": "OpenAI/whisper/"},
         # Cap workers to avoid Windows I/O thrash
         "num_cores": min(8, os.cpu_count() or 4),
