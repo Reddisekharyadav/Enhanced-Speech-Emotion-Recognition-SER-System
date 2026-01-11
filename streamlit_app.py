@@ -31,7 +31,7 @@ except ImportError as e:
 # Initialize logger
 try:
     logger = get_logger(__name__)
-except:
+except Exception:
     import logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
@@ -185,31 +185,7 @@ def plot_emotion_history():
     plt.tight_layout()
     return fig
 
-def predict_emotion_from_file(audio_path: str):
-    """Predict emotion from audio file - same logic as PyQt5 GUI."""
-    try:
-        if not os.path.exists(audio_path):
-            raise FileNotFoundError(f"Audio file missing: {audio_path}")
-        
-        logger.info(f"Predicting emotion for: {audio_path}")
-        result = predict_emotion_realtime(audio_path)
-        
-        # Handle result format
-        if isinstance(result, dict):
-            if "error" in result:
-                logger.error(f"Prediction error: {result['error']}")
-                return None, None
-            elif "label" in result and "confidence" in result:
-                return result["label"], result["confidence"]
-        elif isinstance(result, (list, tuple)) and len(result) >= 2:
-            return str(result[0]), float(result[1])
-        else:
-            return str(result), 0.75
-            
-    except Exception as e:
-        logger.error(f"Prediction failed: {e}")
-        st.error(f"Error: {str(e)}")
-        return None, None
+
 
 def create_sample_audio(emotion: str) -> str:
     """Create sample audio file - same as PyQt5 GUI."""
@@ -258,12 +234,10 @@ def predict_emotion_from_file(audio_path: str):
             return "neutral", 0.50
     
     try:
-        # Import here to catch any import errors
-        import pickle
-        import os
-        from ser.config import Config
+        if not os.path.exists(audio_path):
+            raise FileNotFoundError(f"Audio file missing: {audio_path}")
         
-        # Try to load model and predict
+        logger.info(f"Predicting emotion for: {audio_path}")
         result = predict_emotion_realtime(audio_path)
         
         # Handle different return types
@@ -272,14 +246,17 @@ def predict_emotion_from_file(audio_path: str):
                 error_msg = result["error"]
                 st.error(f"Model error: {error_msg}")
                 logger.error(f"Prediction error: {error_msg}")
-                # Try demo mode as fallback
+                # Use demo mode as fallback
                 st.info("🔄 Falling back to demo mode...")
-                return predict_emotion_from_file.__wrapped__(audio_path) if hasattr(predict_emotion_from_file, '__wrapped__') else ("neutral", 0.5)
+                y, sr = librosa.load(audio_path, duration=10)
+                energy = np.mean(librosa.feature.rms(y=y))
+                return "neutral", 0.50
             elif "label" in result and "confidence" in result:
                 return result["label"], result["confidence"]
-        
-        # Fallback: treat as string label
-        return str(result), 0.75
+        elif isinstance(result, (list, tuple)) and len(result) >= 2:
+            return str(result[0]), float(result[1])
+        else:
+            return str(result), 0.75
         
     except FileNotFoundError as e:
         st.error(f"⚠️ Model files not found. Please ensure trained models are in 'ser/models/' directory.")
@@ -320,7 +297,7 @@ def main():
     
     # Sidebar - matching PyQt5 sensitivity control
     with st.sidebar:
-        st.image("https://img.icons8.com/fluency/96/000000/voice-recognition.png", width=80)
+        st.markdown("# 🎤")
         st.title("⚙️ Settings")
         
         sensitivity = st.slider(
@@ -433,7 +410,7 @@ def main():
                             if os.path.exists(tmp_path):
                                 try:
                                     os.unlink(tmp_path)
-                                except:
+                                except Exception:
                                     pass
             
             with col_record2:
@@ -510,6 +487,12 @@ def main():
     with tab2:
         st.header("📁 File Analysis")
         st.write("Upload an audio file (.wav, .mp3, .flac) to analyze the emotion")
+        
+        # Define emoji map for use in this tab
+        emoji_map = {
+            "happy": "😊", "sad": "😢", "angry": "😠", "fearful": "😨",
+            "surprised": "😲", "neutral": "😐", "calm": "😌", "disgust": "🤢"
+        }
         
         uploaded_file = st.file_uploader(
             "Choose an audio file",
@@ -622,7 +605,7 @@ def main():
                             if os.path.exists(tmp_path):
                                 try:
                                     os.unlink(tmp_path)
-                                except:
+                                except Exception:
                                     pass
     
     # Tab 3: Sample Audio (matching PyQt5 create_samples_tab)
@@ -689,7 +672,7 @@ def main():
             else:
                 st.error("⚠️ SER modules not available. Cannot train model.")
                 train_button_text = "❌ Training Unavailable"
-        except:
+        except Exception:
             st.warning("⚠️ Could not check model status.")
             train_button_text = "🚀 Start Training"
         
