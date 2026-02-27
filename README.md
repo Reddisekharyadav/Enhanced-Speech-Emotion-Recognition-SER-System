@@ -4,7 +4,7 @@
 An advanced Speech Emotion Recognition system for real-time and file-based emotion analysis, featuring a modern GUI, AI-powered chat responses, and robust model training and evaluation.
 
 ## 🌐 **Live Demo**
-**Try it now:** [https://your-app.streamlit.app](https://share.streamlit.io) *(Deploy to get your link!)*
+**Try it now:** [(https://mrs-emotiondetector-ai.streamlit.app/)]
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io)
 
