@@ -753,18 +753,18 @@ def main():
                 st.info("No training logs yet. Start training to see progress.")
     
     # Footer
-    # st.markdown("---")
-    # st.markdown("""
-    # <div style='text-align: center; color: #666;'>
-    #     <p>🎭 Enhanced Speech Emotion Recognition System | Built with ❤️ using Streamlit</p>
-    #     <p><small>GitHub: <a href="https://github.com/Reddisekharyadav/Enhanced-Speech-Emotion-Recognition-SER-System" target="_blank">Enhanced-SER-System</a></small></p>
-    #     <p style='margin-top: 10px;'><strong>Developed By:</strong></p>
-    #     <p>
-    #         👨‍💻 <a href="https://github.com/Reddisekharyadav" target="_blank">Marugani Reddisekhar</a> | 
-    #         👨‍💻 <a href="https://github.com/kuruvamunirangadu" target="_blank">Muni Rangadu</a>
-    #     </p>
-    # </div>
-    # """, unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666;'>
+        <p>🎭 Enhanced Speech Emotion Recognition System | Built with ❤️ using Streamlit</p>
+        <p><small>GitHub: <a href="https://github.com/Reddisekharyadav/Enhanced-Speech-Emotion-Recognition-SER-System" target="_blank">Enhanced-SER-System</a></small></p>
+        <p style='margin-top: 10px;'><strong>Developed By:</strong></p>
+        <p>
+            👨‍💻 <a href="https://github.com/Reddisekharyadav" target="_blank">Marugani Reddisekhar</a> | 
+            👨‍💻 <a href="https://github.com/kuruvamunirangadu" target="_blank">Muni Rangadu</a>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
