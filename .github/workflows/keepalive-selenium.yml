@@ -1,0 +1,47 @@
+name: Streamlit Keep Alive (Selenium)
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "Target app URL"
+        required: true
+        default: "https://mrs-emotiondetector-ai.streamlit.app/"
+      wait_seconds:
+        description: "Wait time after load"
+        required: true
+        default: "12"
+  schedule:
+    - cron: "*/15 * * * *"
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DEFAULT_APP_URL: https://mrs-emotiondetector-ai.streamlit.app/
+      DEFAULT_WAIT_SECONDS: "12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Selenium
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium
+
+      - name: Keep app alive with Selenium
+        env:
+          INPUT_APP_URL: ${{ github.event.inputs.app_url }}
+          INPUT_WAIT_SECONDS: ${{ github.event.inputs.wait_seconds }}
+        run: |
+          APP_URL="${INPUT_APP_URL:-$DEFAULT_APP_URL}"
+          WAIT_SECONDS="${INPUT_WAIT_SECONDS:-$DEFAULT_WAIT_SECONDS}"
+
+          echo "Keep-alive running for: $APP_URL"
+          python scripts/keep_alive_selenium.py --url "$APP_URL" --wait-seconds "$WAIT_SECONDS"
